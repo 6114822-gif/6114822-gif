@@ -10,7 +10,7 @@
 **Проекты:**
 - [telegram-reminder-bot](https://github.com/6114822-gif/telegram-reminder-bot) — Telegram-бот на Python для создания напоминаний с задержкой (минуты/часы/дни)
 - [telegram-payment-bot](https://github.com/6114822-gif/telegram-payment-bot) — Telegram-бот с приёмом оплаты через Telegram Stars
-- [price-scraper](https://github.com/6114822-gif/price-scraper) — парсер цен и данных на Python, сохраняет результат в CSV
+- [price-scraper](https://github.com/6114822-gif/price-scraper) — парсер книг-детективов на Python (livelib.ru): название, автор, рейтинг, число читателей → CSV
 - [telegram-reminder-bot-persistent](https://github.com/6114822-gif/telegram-reminder-bot-persistent) — версия напоминалки с сохранением данных в файл (напоминания не теряются при перезапуске)
 - [ai-support-assistant](https://github.com/6114822-gif/ai-support-assistant) — веб-чат с ИИ-ассистентом на Claude API (Flask); знания о возврате/гарантии сверены с реальным текстом Закона РФ "О защите прав потребителей"
 
