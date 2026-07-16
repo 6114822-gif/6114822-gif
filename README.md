@@ -1,16 +1,15 @@
-## Hi there 👋
+### Привет 👋
 
-<!--
-**6114822-gif/6114822-gif** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Я учусь разработке и собираю практические проекты — от Telegram-ботов до автоматизации рутины и интеграций с ИИ.
 
-Here are some ideas to get you started:
+**Чем занимаюсь:**
+- 🤖 Telegram/чат-боты
+- ⚙️ Автоматизация процессов (парсинг, интеграции, скрипты)
+- 🧠 ИИ-инструменты на базе Claude/OpenAI API
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+**Проекты:**
+- [telegram-reminder-bot](https://github.com/6114822-gif/telegram-reminder-bot) — Telegram-бот на Python для создания напоминаний с задержкой (минуты/часы/дни)
+
+**Стек:** Python, Telegram Bot API, Git
+
+📫 Как со мной связаться: [@demlider](https://t.me/demlider)
