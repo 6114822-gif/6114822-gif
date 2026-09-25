@@ -93,6 +93,9 @@ class HttpClient:
         for attempt in range(self.max_retries):
             try:
                 resp = self.session.get(url, params=params, timeout=self.timeout_sec)
+            except requests.exceptions.ProxyError as exc:
+                # Прокси отказал в CONNECT (облачная среда, домен не разрешен) — повторять бессмысленно.
+                raise PermissionError(f"Прокси запретил доступ к {url}: домен не открыт в Network access") from exc
             except requests.RequestException as exc:
                 last_error = exc
                 wait = self.backoff_sec * 2 ** attempt
@@ -108,10 +111,10 @@ class HttpClient:
                 last_error = RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
                 self.sleep(wait)
                 continue
-            if resp.status_code == 403:
+            if resp.status_code in (403, 451):
                 raise PermissionError(
-                    f"403 от {url}. Если это облачная среда — домен не открыт в Network access; "
-                    f"если VPS — возможно, гео-блокировка Binance для региона сервера."
+                    f"HTTP {resp.status_code} от {url}. 403 в облачной среде — домен не открыт в Network access; "
+                    f"451 — Binance блокирует регион сервера (например, США)."
                 )
             resp.raise_for_status()
             return resp
@@ -182,6 +185,17 @@ def funding_from_rest(rows: list[dict]) -> pd.DataFrame:
     return out
 
 
+def parse_funding_csv(raw: bytes) -> pd.DataFrame:
+    """CSV funding из архива: calc_time,funding_interval_hours,last_funding_rate."""
+    text = raw.decode("utf-8")
+    first = text.split("\n", 1)[0].split(",", 1)[0].strip()
+    names = ["calc_time", "funding_interval_hours", "last_funding_rate"]
+    df = pd.read_csv(io.StringIO(text), header=None, names=names, skiprows=0 if first.isdigit() else 1)
+    rows = [{"fundingTime": int(t), "fundingRate": r}
+            for t, r in zip(df["calc_time"], df["last_funding_rate"])]
+    return funding_from_rest(rows)
+
+
 # --------------------------------------------------------------------------- Архив
 
 def archive_month_url(symbol: str, interval: str, year: int, month: int) -> str:
@@ -189,10 +203,18 @@ def archive_month_url(symbol: str, interval: str, year: int, month: int) -> str:
     return f"{ARCHIVE_BASE}/monthly/klines/{symbol}/{interval}/{name}"
 
 
-def fetch_archive_month(client: HttpClient, symbol: str, interval: str, year: int,
-                        month: int, verify: bool = True) -> pd.DataFrame | None:
-    """Скачать месяц из архива. None — если архива за этот месяц нет."""
-    url = archive_month_url(symbol, interval, year, month)
+def archive_day_url(symbol: str, interval: str, day: date) -> str:
+    name = f"{symbol}-{interval}-{day:%Y-%m-%d}.zip"
+    return f"{ARCHIVE_BASE}/daily/klines/{symbol}/{interval}/{name}"
+
+
+def archive_funding_month_url(symbol: str, year: int, month: int) -> str:
+    name = f"{symbol}-fundingRate-{year:04d}-{month:02d}.zip"
+    return f"{ARCHIVE_BASE}/monthly/fundingRate/{symbol}/{name}"
+
+
+def _fetch_zip_csv(client: HttpClient, url: str, verify: bool) -> bytes | None:
+    """Скачать ZIP из архива, проверить SHA-256, вернуть содержимое первого CSV."""
     resp = client.get(url)
     if resp is None:
         return None
@@ -210,7 +232,50 @@ def fetch_archive_month(client: HttpClient, symbol: str, interval: str, year: in
         csv_names = [n for n in zf.namelist() if n.endswith(".csv")]
         if not csv_names:
             raise ValueError(f"В архиве нет CSV: {url}")
-        return parse_klines_csv(zf.read(csv_names[0]))
+        return zf.read(csv_names[0])
+
+
+def fetch_archive_month(client: HttpClient, symbol: str, interval: str, year: int,
+                        month: int, verify: bool = True) -> pd.DataFrame | None:
+    """Скачать месяц свечей из архива. None — если архива за этот месяц нет."""
+    raw = _fetch_zip_csv(client, archive_month_url(symbol, interval, year, month), verify)
+    return parse_klines_csv(raw) if raw is not None else None
+
+
+def fetch_archive_days(client: HttpClient, symbol: str, interval: str, start: datetime,
+                       end: datetime, verify: bool = True) -> pd.DataFrame:
+    """Свечи [start, end) из дневных архивов (только полностью завершенные сутки).
+
+    Запасной путь, когда REST fapi недоступен (гео-блокировка): архив
+    выкладывается с задержкой ~1 сутки, поэтому последние часы будут пропущены.
+    """
+    frames = []
+    day = start.date()
+    while datetime(day.year, day.month, day.day, tzinfo=timezone.utc) < end:
+        raw = _fetch_zip_csv(client, archive_day_url(symbol, interval, day), verify)
+        if raw is not None:
+            frames.append(parse_klines_csv(raw))
+        day += timedelta(days=1)
+    if not frames:
+        return _empty_klines()
+    df = pd.concat(frames)
+    df = df[~df.index.duplicated(keep="last")].sort_index()
+    return df[(df.index >= start) & (df.index < end)]
+
+
+def fetch_archive_funding(client: HttpClient, symbol: str, start: datetime, end: datetime,
+                          verify: bool = True) -> pd.DataFrame:
+    """Funding из помесячного архива (запасной путь при недоступном REST)."""
+    frames = []
+    for m_start in _month_starts(start, end):
+        raw = _fetch_zip_csv(client, archive_funding_month_url(symbol, m_start.year, m_start.month), verify)
+        if raw is not None:
+            frames.append(parse_funding_csv(raw))
+    if not frames:
+        return funding_from_rest([])
+    df = pd.concat(frames)
+    df = df[~df.index.duplicated(keep="last")].sort_index()
+    return df[(df.index >= start) & (df.index < end)]
 
 
 # --------------------------------------------------------------------------- REST
@@ -327,8 +392,15 @@ def download_klines(client: HttpClient, store: Path, symbol: str, interval: str,
             if df is not None:
                 log.info("%s %s %s: архив, %d баров", symbol, interval, m_start.strftime("%Y-%m"), len(df))
         if df is None and source in ("auto", "rest"):
-            df = fetch_rest_klines(client, symbol, interval, _to_ms(seg_start), _to_ms(seg_end))
-            log.info("%s %s %s: REST, %d баров", symbol, interval, m_start.strftime("%Y-%m"), len(df))
+            try:
+                df = fetch_rest_klines(client, symbol, interval, _to_ms(seg_start), _to_ms(seg_end))
+                log.info("%s %s %s: REST, %d баров", symbol, interval, m_start.strftime("%Y-%m"), len(df))
+            except PermissionError as exc:
+                if source != "auto":
+                    raise
+                log.warning("REST недоступен (%s) — беру дневные архивы", exc)
+                df = fetch_archive_days(client, symbol, interval, seg_start, seg_end, verify)
+                log.info("%s %s %s: дневной архив, %d баров", symbol, interval, m_start.strftime("%Y-%m"), len(df))
         if df is not None and len(df):
             pieces.append(df[(df.index >= seg_start) & (df.index < seg_end)])
         # Промежуточное сохранение раз в 6 месяцев — чтобы обрыв не стоил всей загрузки.
@@ -345,14 +417,18 @@ def download_klines(client: HttpClient, store: Path, symbol: str, interval: str,
 
 
 def download_funding(client: HttpClient, store: Path, symbol: str, start: datetime,
-                     end: datetime | None = None) -> pd.DataFrame:
+                     end: datetime | None = None, verify: bool = True) -> pd.DataFrame:
     end = end or datetime.now(timezone.utc)
     path = storage.funding_path(store, symbol)
     existing = storage.load_frame(path)
     cursor = start
     if existing is not None and len(existing):
         cursor = max(start, existing.index[-1].to_pydatetime() + timedelta(seconds=1))
-    new = fetch_rest_funding(client, symbol, _to_ms(cursor), _to_ms(end))
+    try:
+        new = fetch_rest_funding(client, symbol, _to_ms(cursor), _to_ms(end))
+    except PermissionError as exc:
+        log.warning("REST funding недоступен (%s) — беру месячный архив", exc)
+        new = fetch_archive_funding(client, symbol, cursor, end, verify)
     merged = storage.merge_frames(existing, new)
     if merged is None:
         merged = new
@@ -380,7 +456,7 @@ def run(symbols: list[str], intervals: list[str], start: datetime, store: Path,
         if "5m" in frames and "1d" in frames and len(frames["5m"]) and len(frames["1d"]):
             sym_report["m5_vs_d1"] = compare_daily(frames["5m"], frames["1d"])
         if funding:
-            f = download_funding(client, store, symbol, start)
+            f = download_funding(client, store, symbol, start, verify=verify)
             sym_report["funding"] = {
                 "records": int(len(f)),
                 "first": str(f.index[0]) if len(f) else None,

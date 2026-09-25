@@ -200,3 +200,43 @@ def test_run_writes_quality_report(tmp_path, monkeypatch):
     assert sym["5m"]["bars"] == 2 * 288 and sym["5m"]["missing_bars"] == 0
     assert sym["funding"]["records"] == 6
     assert (tmp_path / "binance_um" / "quality_report.json").exists()
+
+
+class GeoBlockedClient(FakeClient):
+    """REST fapi отвечает 451 (гео-блокировка), архив доступен."""
+
+    def get(self, url, params=None):
+        if url.startswith(dl.FAPI_BASE):
+            raise PermissionError("HTTP 451")
+        return super().get(url, params)
+
+
+def _day_rows(day: pd.Timestamp) -> list[list]:
+    return [_row(int(t.value // 1_000_000))
+            for t in pd.date_range(day, day + pd.Timedelta(days=1), freq="5min", inclusive="left")]
+
+
+def test_fallback_to_archives_when_rest_geo_blocked(tmp_path):
+    archive = {dl.archive_month_url("BTCUSDT", "5m", 2024, 1):
+               _zip("m.csv", _csv(_month_rows(2024, 1), header=True))}
+    for d in pd.date_range("2024-02-01", "2024-02-04", freq="D", tz="UTC"):
+        archive[dl.archive_day_url("BTCUSDT", "5m", d.date())] = _zip("d.csv", _csv(_day_rows(d), True))
+    fund = "calc_time,funding_interval_hours,last_funding_rate\n" + "\n".join(
+        f"{int(t.value // 1_000_000) + 2},8,0.0001"
+        for t in pd.date_range("2024-01-01", "2024-02-01", freq="8h", tz="UTC", inclusive="left"))
+    archive[dl.archive_funding_month_url("BTCUSDT", 2024, 1)] = _zip("f.csv", fund.encode())
+
+    client = GeoBlockedClient(archive, rest_until_ms=0)
+    start = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    end = datetime(2024, 2, 5, 6, 0, tzinfo=timezone.utc)
+    df = dl.download_klines(client, tmp_path, "BTCUSDT", "5m", start, end=end)
+    # январь из месячного архива + 1–4 февраля из дневных; 5 февраля еще нет в архиве
+    assert len(df) == (31 + 4) * 288
+    assert df.index[-1] == pd.Timestamp("2024-02-04 23:55", tz="UTC")
+
+    f = dl.download_funding(client, tmp_path, "BTCUSDT", start, datetime(2024, 2, 1, tzinfo=timezone.utc))
+    assert len(f) == 31 * 3 and f.index[0] == pd.Timestamp("2024-01-01", tz="UTC")
+
+    with pytest.raises(PermissionError):
+        dl.download_klines(GeoBlockedClient({}, 0), tmp_path / "x", "BTCUSDT", "5m", start,
+                           end=end, source="rest")
