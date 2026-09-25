@@ -1,0 +1,344 @@
+{
+  "generated_at": "2026-09-25T11:21:45.367134+00:00",
+  "start": "2021-01-01T00:00:00+00:00",
+  "symbols": {
+    "BTCUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 602784,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 66,
+        "outlier_bars": 303,
+        "largest_gaps": []
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2093,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 0,
+        "largest_gaps": []
+      },
+      "m5_vs_d1": {
+        "days_compared": 2093,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6207,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": 9.902560012888672e-05
+      }
+    },
+    "ETHUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 602784,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 47,
+        "outlier_bars": 277,
+        "largest_gaps": []
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2093,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 0,
+        "largest_gaps": []
+      },
+      "m5_vs_d1": {
+        "days_compared": 2093,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6207,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": 0.00010561216690832931
+      }
+    },
+    "SOLUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 601344,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 1440,
+        "missing_pct": 0.23889154323936931,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 47,
+        "outlier_bars": 152,
+        "largest_gaps": [
+          [
+            "2022-02-25 23:55:00+00:00",
+            "2022-03-01 00:00:00+00:00",
+            864
+          ],
+          [
+            "2022-03-31 23:55:00+00:00",
+            "2022-04-03 00:00:00+00:00",
+            576
+          ]
+        ]
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2088,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 5,
+        "missing_pct": 0.23889154323936931,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 5,
+        "largest_gaps": [
+          [
+            "2022-02-25 00:00:00+00:00",
+            "2022-03-01 00:00:00+00:00",
+            3
+          ],
+          [
+            "2022-03-31 00:00:00+00:00",
+            "2022-04-03 00:00:00+00:00",
+            2
+          ]
+        ]
+      },
+      "m5_vs_d1": {
+        "days_compared": 2088,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6282,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": 7.6229465138491005e-06
+      }
+    },
+    "XRPUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 601344,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 1440,
+        "missing_pct": 0.23889154323936931,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 47,
+        "outlier_bars": 389,
+        "largest_gaps": [
+          [
+            "2022-02-25 23:55:00+00:00",
+            "2022-03-01 00:00:00+00:00",
+            864
+          ],
+          [
+            "2022-03-31 23:55:00+00:00",
+            "2022-04-03 00:00:00+00:00",
+            576
+          ]
+        ]
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2088,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 5,
+        "missing_pct": 0.23889154323936931,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 18,
+        "largest_gaps": [
+          [
+            "2022-02-25 00:00:00+00:00",
+            "2022-03-01 00:00:00+00:00",
+            3
+          ],
+          [
+            "2022-03-31 00:00:00+00:00",
+            "2022-04-03 00:00:00+00:00",
+            2
+          ]
+        ]
+      },
+      "m5_vs_d1": {
+        "days_compared": 2088,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6207,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": 0.00011852503624939584
+      }
+    },
+    "BNBUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 602784,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 47,
+        "outlier_bars": 196,
+        "largest_gaps": []
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2093,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 5,
+        "largest_gaps": []
+      },
+      "m5_vs_d1": {
+        "days_compared": 2093,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6207,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": -4.578398582245845e-06
+      }
+    },
+    "DOGEUSDT": {
+      "5m": {
+        "interval": "5m",
+        "bars": 602784,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 23:55:00+00:00",
+        "expected_bars": 602784,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 47,
+        "outlier_bars": 377,
+        "largest_gaps": []
+      },
+      "1d": {
+        "interval": "1d",
+        "bars": 2093,
+        "start": "2021-01-01 00:00:00+00:00",
+        "end": "2026-09-24 00:00:00+00:00",
+        "expected_bars": 2093,
+        "missing_bars": 0,
+        "missing_pct": 0.0,
+        "duplicates": 0,
+        "ohlc_violations": 0,
+        "non_positive_prices": 0,
+        "zero_volume_bars": 0,
+        "outlier_bars": 28,
+        "largest_gaps": []
+      },
+      "m5_vs_d1": {
+        "days_compared": 2093,
+        "open_max_rel_diff": 0.0,
+        "open_days_diff_gt_1bp": 0,
+        "high_max_rel_diff": 0.0,
+        "high_days_diff_gt_1bp": 0,
+        "low_max_rel_diff": 0.0,
+        "low_days_diff_gt_1bp": 0,
+        "close_max_rel_diff": 0.0,
+        "close_days_diff_gt_1bp": 0
+      },
+      "funding": {
+        "records": 6207,
+        "first": "2021-01-01 00:00:00+00:00",
+        "last": "2026-08-31 16:00:00+00:00",
+        "mean_rate": 0.00011594621234090544
+      }
+    }
+  }
+}
