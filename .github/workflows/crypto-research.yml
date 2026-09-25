@@ -1,0 +1,83 @@
+# Исследование crypto_bingx на серверах GitHub (у них есть доступ к Binance).
+# Запуск: изменить файл crypto_bingx/RUN_RESEARCH и запушить, либо кнопка
+# "Run workflow" во вкладке Actions.
+# Результат: отчеты коммитятся в ту же ветку (crypto_bingx/docs/reports/),
+# скачанные данные (Parquet) — в артефакт запуска "binance-data".
+name: crypto-research
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - crypto_bingx/RUN_RESEARCH
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-research-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Установка зависимостей
+        run: pip install -r crypto_bingx/requirements.txt
+
+      - name: Тесты
+        run: python -m pytest crypto_bingx/tests -q
+
+      - name: Параметры запуска
+        id: cfg
+        run: |
+          # первая строка RUN_RESEARCH — символы, вторая — дата начала
+          SYMBOLS=$(sed -n '1p' crypto_bingx/RUN_RESEARCH)
+          START=$(sed -n '2p' crypto_bingx/RUN_RESEARCH)
+          echo "symbols=${SYMBOLS:-BTCUSDT ETHUSDT SOLUSDT}" >> "$GITHUB_OUTPUT"
+          echo "start=${START:-2021-01-01}" >> "$GITHUB_OUTPUT"
+
+      - name: Проверка доступа к Binance
+        run: |
+          for u in https://data.binance.vision/ https://fapi.binance.com/fapi/v1/ping; do
+            echo "$u -> $(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$u")"
+          done
+
+      - name: Загрузка данных
+        run: |
+          python -m crypto_bingx.data.download_binance_data \
+            --symbols ${{ steps.cfg.outputs.symbols }} \
+            --intervals 5m 1d --start ${{ steps.cfg.outputs.start }}
+          cp crypto_bingx/data/store/binance_um/quality_report.json crypto_bingx/docs/reports/quality_report.json
+
+      - name: Издержки против стопа (шаг 1.2)
+        run: python -m crypto_bingx.research.cost_vs_stop --symbols ${{ steps.cfg.outputs.symbols }}
+
+      - name: Сетка параметров (H0 + стоп 0.3/0.45/0.6 × цели ×2/×3)
+        run: |
+          python -m crypto_bingx.backtest.run_backtest --forts-baseline --jobs 4 \
+            --symbols ${{ steps.cfg.outputs.symbols }} \
+            --out crypto_bingx/docs/reports/grid_binance_latest.md
+
+      - name: Данные в артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-data
+          path: crypto_bingx/data/store/
+          retention-days: 30
+
+      - name: Коммит отчетов
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crypto_bingx/docs/reports/
+          git commit -m "Отчеты исследования: данные Binance с ${{ steps.cfg.outputs.start }}" || echo "нет изменений"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
