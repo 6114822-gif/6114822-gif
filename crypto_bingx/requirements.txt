@@ -1,0 +1,6 @@
+# Этап 1 (исследование и бэктест)
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14
+requests>=2.31
+pytest>=7

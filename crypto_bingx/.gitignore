@@ -1,0 +1,8 @@
+# Скачанные данные и результаты прогонов — не в git
+data/store/
+*.parquet
+*.tmp
+__pycache__/
+.pytest_cache/
+.venv/
+.env
